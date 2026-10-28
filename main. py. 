@@ -1,0 +1,82 @@
+
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.button import Button
+from kivy.uix.textinput import TextInput
+
+
+class Calculadora(App):
+
+    def build(self):
+        principal = BoxLayout(
+            orientation="vertical",
+            padding=10,
+            spacing=10
+        )
+
+        self.ecra = TextInput(
+            text="",
+            font_size=35,
+            readonly=True,
+            halign="right",
+            multiline=False,
+            size_hint_y=0.25
+        )
+
+        principal.add_widget(self.ecra)
+
+        grelha = GridLayout(
+            cols=4,
+            spacing=5
+        )
+
+        botoes = [
+            "7", "8", "9", "/",
+            "4", "5", "6", "*",
+            "1", "2", "3", "-",
+            "C", "0", "=", "+"
+        ]
+
+        for texto in botoes:
+            botao = Button(
+                text=texto,
+                font_size=25
+            )
+            botao.bind(on_press=self.pressionar)
+            grelha.add_widget(botao)
+
+        principal.add_widget(grelha)
+        return principal
+
+    def pressionar(self, botao):
+        texto = botao.text
+
+        if texto == "C":
+            self.ecra.text = ""
+
+        elif texto == "=":
+            try:
+                expressao = self.ecra.text
+
+                permitidos = set("0123456789+-*/.() ")
+                if not expressao or not all(
+                    c in permitidos for c in expressao
+                ):
+                    self.ecra.text = "Erro"
+                    return
+
+                resultado = eval(expressao, {"__builtins__": {}})
+                self.ecra.text = str(resultado)
+
+            except (ValueError, ZeroDivisionError, SyntaxError):
+                self.ecra.text = "Erro"
+
+        else:
+            if self.ecra.text == "Erro":
+                self.ecra.text = ""
+            self.ecra.text += texto
+
+
+if __name__ == "__main__":
+    Calculadora().run()
